@@ -1,0 +1,125 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt", "hatch-build-scripts"]
+build-backend = "hatchling.build"
+
+[project]
+name = "playground"
+version = "0.0.1"
+authors = [
+    { name="Petrakov Oleg", email="murami.ike@gmail.com" },
+]
+maintainers = [
+    { name="Petrakov Oleg", email="murami.ike@gmail.com" },
+]
+description = "Python distribution package configuration example"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = [
+    "package",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# dependencies = ["cryptography"]
+dynamic = ["dependencies", "optional-dependencies"]  # use plugin: https://github.com/repo-helper/hatch-requirements-txt
+
+[project.urls]
+"Source code" = "https://github.com/IkeMurami-Examples/python-package"
+Issues = "https://github.com/IkeMurami-Examples/python-package/issues"
+
+[tool.hatch.metadata.hooks.requirements_txt]
+# dependencies
+files = ["requirements.txt"]
+
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+# optional-dependencies
+myplugin = ["src/first-package-namespace/plugins/myplugin/requirements.txt"]
+all = ["requirements-all.txt"]
+
+# [project.optional-dependencies]
+# Мы можем определить зависимости для extra инсталляции -> 
+# pip install playground[myplugin]
+#myplugin = [
+    # "playground",  # our core package
+#    "requests",
+#]
+# pip install playground[all]
+# all = [
+#    "playground[myplugin]",
+#    "flake8",
+# ]
+
+# Создание плагинов
+# https://packaging.python.org/en/latest/guides/creating-and-discovering-plugins/#using-package-metadata
+# Это только лишь текстовое описание, что если хочешь использовать плагин, подгрузи такой-то пакет (import playground.core.plugins.myplugin)
+# Установкой пакета занимаемся в sdist/wheel
+[project.entry-points.'playground.plugins']
+myplugin = "playground.core.plugins.myplugin"
+
+# Кодогенерация -> мы можем запустить любую программу: https://github.com/rmorshea/hatch-build-scripts
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+# out_dir = "."
+# work_dir = "."
+commands = [
+    'python tools/generate.py > test.txt',
+]
+artifacts = [
+]
+# clean_artifacts = true
+# clean_out_dir = false
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/*",
+    "tools/*",
+]
+exclude = [
+    "usage-example/*",
+]
+
+[tool.hatch.build.targets.wheel]
+# sources = ["src/first-package-namespace"]
+only-include = [
+    "src/first-package-namespace/plugins/myplugin",
+    "src/first-package-namespace/subpkg1",
+    "src/first-package-namespace/subpkg2",
+
+    "src/second-package-namespace/subpkg1",
+    "src/second-package-namespace/subpkg3",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/first-package-namespace" = "playground/core"
+"src/second-package-namespace" = "playground/ext"
+
+# [tool.hatch.build.targets.wheel.hooks.blabla]
+
+[tool.hatch.envs.default]
+post-install-commands = [
+  "run",
+]
+
+[tool.hatch.envs.default.scripts]
+# pipx run hatch run default:run
+run = "echo run default !!! > echo.txt"
+
+[tool.hatch.envs.myplugin]
+features = [
+    # Берем зависимости из myplugin
+    "myplugin",
+]
+
+[tool.hatch.envs.test]
+dependencies = [
+    "coverage[toml]",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]
+
