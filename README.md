@@ -58,3 +58,13 @@ Python distribution package configuration example
 - isort
 - pep8
 - ruff (как альтернатива flake8 + black)
+
+## Установка
+
+```
+~ python3 -m venv .venv
+~ source .venv/bin/activate
+~ python -m pip install ".[all]"
+~ python -m pip install ".[myplugin]"
+~ python -m pip install "."
+```
